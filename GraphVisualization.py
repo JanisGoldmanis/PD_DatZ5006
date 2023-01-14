@@ -6,26 +6,19 @@ import matplotlib.pyplot as plt
 
 # Defining a Class
 class GraphVisualization:
-
     def __init__(self):
-        # visual is a list which stores all
-        # the set of edges that constitutes a
-        # graph
         self.visual = []
 
-    # addEdge function inputs the vertices of an
-    # edge and appends it to the visual list
-    def addEdge(self, a, b):
-        temp = [a, b]
-        self.visual.append(temp)
+    def addEdge(self, a, b, weight):
+        self.visual.append((a, b, weight))
 
-    # In visualize function G is an object of
-    # class Graph given by networkx G.add_edges_from(visual)
-    # creates a graph with a given list
-    # nx.draw_networkx(G) - plots the graph
-    # plt.show() - displays the graph
     def visualize(self):
         G = nx.Graph()
-        G.add_edges_from(self.visual)
-        nx.draw_networkx(G)
+        G.add_weighted_edges_from(self.visual)
+        pos = nx.spring_layout(G, weight=None, k=0.5, iterations=100, scale=2, center=(0,0))
+        nx.draw_networkx(G, pos)
+        labels = nx.get_edge_attributes(G, 'weight')
+        nx.draw_networkx_edge_labels(G, pos=pos, edge_labels=labels, label_pos=0.5)
         plt.show()
+
+

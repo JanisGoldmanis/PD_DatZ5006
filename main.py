@@ -1,111 +1,111 @@
-import GraphVisualization as GV
+# import GraphVisualization as GV
+# import Solution
+import Graph
 
-# Opening and parsing input file
+file = "prog_2022_sample_input_1.txt"
 
-f = open("prog_2022_sample_input_1.txt", "r")
-lines = f.readlines()
-numbers = []
-for line in lines:
-    numbers += line.split()
-numbers = [int(x) for x in numbers]
+graph = Graph.generate_graph(file)
 
-# Generating meta data regarding graph
-
-number_of_nodes = numbers[0]
-number_of_edges = int((len(numbers) - 1) / 3)
-
-vertice_set = set()
-edge_set = set()
-taken_edges = set()
-edge_weight = {}
-adjacent_vertices = {}
-
-for index in range(number_of_edges):
-    i = index * 3 + 1
-    vertice_set.add(numbers[i])
-    vertice_set.add(numbers[i + 1])
-    edge_format = f'{min(numbers[i], numbers[i + 1])}-{max(numbers[i], numbers[i + 1])}'
-    edge_set.add(edge_format)
-    edge_weight[edge_format] = numbers[i+2]
-
-print(f'Vertices: {vertice_set}')
-print(f'Edges: {edge_set}')
-
-for vertice in vertice_set:
-    adjacent_vertices[vertice] = []
-
-# print(f'Adjacent vertices: {adjacent_vertices}')
-
-for edge in edge_set:
-    vertices = edge.split('-')
-    start = int(vertices[0])
-    end = int(vertices[1])
-    adjacent_vertices[start].append(end)
-    adjacent_vertices[end].append(start)
-
-for vertice in adjacent_vertices.keys():
-    adjacent_vertices[vertice] = sorted(adjacent_vertices[vertice])
-
-# for vertice in adjacent_vertices.keys():
-#     print(f'Vertice {vertice:>3}: {adjacent_vertices[vertice]}')
-
-score = 0
-graph = (vertice_set, edge_set, edge_weight, adjacent_vertices)
-solution = (graph, taken_edges, score)
+# solution = Solution.Solution()
+# solution.graph = graph
+# solution.taken_edges = graph.taken_edges
+# solution.score = graph.score
 
 
-def remove_edge(solution, edge):
-    graph = solution[0]
-    taken_edges = solution[1]
-    vertice_set = graph[0]
-    edge_set = graph[1]
-    edge_weight = graph[2]
-    adjacent_vertices = graph[3]
-    vertices = edge.split('-')
-    start = int(vertices[0])
-    end = int(vertices[1])
-
-    taken_edges.add(edge)
-    edge_set.remove(edge)
-    weight = edge_weight[edge]
-    adjacent_vertices[start].remove(end)
-    adjacent_vertices[end].remove(start)
-    return weight
 
 
-def print_graph(graph):
-    print('Printing graph:')
-    print(graph[0])
-    print(graph[1])
-    for vertice in graph[3].keys():
-        print(f'Vertice {vertice:>3}: {adjacent_vertices[vertice]}')
-    print()
-
-
-print(score)
-print(taken_edges)
-
-print_graph(graph)
+# graph.print_graph()
+#
+# graph.visualize_graph()
 
 # Add all negative
 
+for edge in graph.edges.copy():
+    if graph.edge_weight[edge] < 0:
+        graph.score += Graph.remove_edge(graph, edge)
 
-for edge in edge_set.copy():
-    if edge_weight[edge] < 0:
-        score += remove_edge(solution, edge)
 
-taken_edges = sorted(taken_edges)
-print(score)
-print(taken_edges)
 
-print_graph(graph)
+graph.taken_edges = sorted(graph.taken_edges)
+print(graph.score)
+print(graph.taken_edges)
 
-# Driver code
-G = GV.GraphVisualization()
-G.addEdge(0, 2)
-G.addEdge(1, 2)
-G.addEdge(1, 3)
-G.addEdge(5, 3)
-G.addEdge(3, 4)
-G.addEdge(1, 0)
-G.visualize()
+# graph.print_graph()
+# graph.visualize_graph()
+
+path_list = []
+
+
+# print(f'Edges: {len(graph.edges)}')
+# print(graph.edges)
+
+cycle = True
+
+while cycle:
+    min_path = len(graph.vertices)
+    print(f'Starting min path: {min_path}')
+
+
+    for edge in graph.edges:
+        # print('Searching',edge)
+        path = Graph.find_shortest_cycle(graph, edge)
+        path_list.append(path)
+        print(path)
+
+
+
+    for path in path_list:
+        # print(path)
+        if len(path) < min_path:
+            min_path = len(path)
+    print(f'Actual min path: {min_path}')
+
+    check_paths = []
+
+    for path in path_list:
+        if len(path) == min_path:
+            check_paths.append(path)
+
+    # for path in check_paths:
+    #     print(path)
+
+    min_edge = 200
+    print(f'Finding min edge')
+    for path in check_paths:
+        path.append(path[0])
+        print(path)
+        # print(path)
+        for index in range(len(path) - 1):
+            min_vertice = min(path[index], path[index + 1])
+            max_vertice = max(path[index], path[index + 1])
+            edge = str(min_vertice) + '-' + str(max_vertice)
+            try:
+                print(f'Weight: {graph.edge_weight[edge]}')
+            except:
+                testedge = (f'{path[0]}-{path[1]}')
+                path = Graph.find_shortest_cycle(graph, testedge,True)
+
+            if graph.edge_weight[edge] < min_edge:
+                min_edge = graph.edge_weight[edge]
+    print(f'Min edge: {min_edge}')
+
+
+    flag = False
+    for path in check_paths:
+        for index in range(len(path) - 1):
+            min_vertice = min(path[index], path[index + 1])
+            max_vertice = max(path[index], path[index + 1])
+            edge = str(min_vertice) + '-' + str(max_vertice)
+            # print(f'Path: {path}')
+            if graph.edge_weight[edge] == min_edge:
+                print(f'Removing {edge}')
+                solution.score += remove_edge(solution, edge)
+                flag = True
+                break
+        if flag:
+            break
+    graph.visualize_graph()
+
+print(solution.score)
+
+# print(Graph.find_shortest_cycle(graph,'1-4',True))
