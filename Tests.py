@@ -1,9 +1,12 @@
 import Graph
+import time
 
 # graph = Graph.generate_graph('Test1.txt')
 # graph.visualize_graph()
 #
 # print(Graph.find_shortest_cycle(graph,'1-2'))
+
+start_time = time.time()
 
 graph = Graph.generate_graph('prog_2022_sample_input_3.txt')
 # paths = Graph.get_all_shortest_cycles(graph)
@@ -21,15 +24,21 @@ graph = Graph.generate_graph('prog_2022_sample_input_3.txt')
 # print()
 # graph.visualize_graph()
 
+Graph.remove_negative_edges(graph, debug=False)
+
 while True:
     cycles = Graph.get_all_shortest_cycles(graph, debug=False)
     if len(cycles) == 0:
         break
     # graph.visualize_graph()
-    Graph.remove_best_edge(graph, cycles, debug=False)
+    Graph.remove_best_edges(graph, cycles, debug=False)
     # graph.visualize_graph()
-    if len(graph.edges) % 100 == 0:
-        print(len(graph.edges))
+
+end_time = time.time()
+
+elapsed_time = end_time - start_time
+
+print("Elapsed time: ", elapsed_time, " seconds")
 
 print(graph.score)
 graph.visualize_graph()

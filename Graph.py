@@ -31,9 +31,6 @@ def find_shortest_cycle(graph, edge, debug=False):
         print(f'Current cycle: {current_cycle}')
         print(f'Parrent: {parent}')
 
-    # print(parent)
-    # print(f'current cycle {current_cycle}')
-
     if len(current_cycle) == 0:
         return None
 
@@ -109,7 +106,6 @@ def get_all_shortest_cycles(graph, debug=False):
     for path in paths:
         if len(path) == min_len:
             paths_to_check.append(path)
-
     return paths_to_check
 
 
@@ -136,7 +132,7 @@ def remove_best_edge(graph, cycles, debug=False):
     min_edge = ''
     for cycle in cycles:
 
-        for index in range(len(cycle)-1):
+        for index in range(len(cycle) - 1):
             if index == 0:
                 start = min(cycle[0], cycle[-1])
                 end = max(cycle[0], cycle[-1])
@@ -153,6 +149,73 @@ def remove_best_edge(graph, cycles, debug=False):
     graph.score += remove_edge(graph, min_edge)
 
 
+def remove_best_edges(graph, cycles, debug=False):
+    if debug:
+        print('Starting method of removing multiple best edges')
+        print(f'Length of cycles = {len(cycles[0])}')
+
+    # Generating list of cycles sorted by lightest edge in cycle
+    sorted_list_of_cycles = []
+
+    # Each list entry is tuple ( "cycle", "list of edges", "min weight", "edge with min weight".
+
+    for cycle in cycles:
+        if debug:
+            print(f'Evaluating cycle {cycle}')
+        edge_list = []
+        min_edge_weight = 200
+        min_edge = ''
+
+        for index in range(len(cycle)):
+            start = min(cycle[index - 1], cycle[index])
+            end = max(cycle[index - 1], cycle[index])
+            edge = f'{start}-{end}'
+            edge_list.append(edge)
+            weight = graph.edge_weight[edge]
+            if debug:
+                print(f'    Edge {edge}, Weight: {weight}, Min edge weight: {min_edge_weight}')
+            if weight < min_edge_weight:
+                min_edge_weight = weight
+                min_edge = edge
+        cycle_compilation = (cycle, edge_list, min_edge_weight, min_edge)
+        if debug:
+            print(f'    Sorting {cycle_compilation}, stack size {len(sorted_list_of_cycles)}')
+        if len(sorted_list_of_cycles) == 0:
+            sorted_list_of_cycles.append(cycle_compilation)
+        elif cycle_compilation[2] >= sorted_list_of_cycles[-1][2]:
+            sorted_list_of_cycles.append(cycle_compilation)
+        else:
+            for i in range(len(sorted_list_of_cycles)):
+                if cycle_compilation[2] < sorted_list_of_cycles[i][2]:
+                    sorted_list_of_cycles.insert(i, cycle_compilation)
+                    break
+    if debug:
+        print(f'Starting cycle iteration')
+    for cycle in sorted_list_of_cycles:
+        if debug:
+            print(f'    Evaluating {cycle}')
+        flag = False
+        for edge in cycle[1]:
+            if edge in graph.taken_edges:
+                if debug:
+                    print(f'        {edge} in taken edges')
+                flag = True
+                break
+        if not flag:
+            if debug:
+                print(f'Removing edge: {cycle[3]} with weight: {graph.edge_weight[cycle[3]]}')
+            graph.score += remove_edge(graph, cycle[3])
+
+
+def remove_negative_edges(graph, debug=False):
+    count_before = len(graph.edges)
+    if debug:
+        print(f'Removing negative edges. Total edges: {count_before}')
+    for edge in graph.edges.copy():
+        if graph.edge_weight[edge] <= 0:
+            graph.score += remove_edge(graph, edge)
+    if debug:
+        print(f'Removed {count_before - len(graph.edges)} edges')
 
 
 class Graph:
