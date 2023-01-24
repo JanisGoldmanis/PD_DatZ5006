@@ -24,6 +24,19 @@ def analyze_graph(file_name, visualize, print_edges):
             print(f'Edge: {edge}, Weight: {graph.edge_weight[edge]}')
     if visualize:
         graph.visualize_graph()
+    generate_file(graph)
+
+
+def generate_file(graph):
+    f = open("output.txt", 'w')
+
+    f.write(f'{len(graph.taken_edges)}')
+    f.write(f'\t{graph.score}')
+    for edge in graph.taken_edges:
+        start, end  = Graph.get_end_points(edge)
+        f.write(f'\t{start}')
+        f.write(f'\t{end}')
+    f.close()
 
 
 visualize = False
@@ -40,6 +53,7 @@ while True:
         print('Graph input file name (e.g. prog_2022_sample_input_1.txt)')
         filename = input('File name:')
         analyze_graph(filename, visualize, print_edges)
+
     elif case == '2':
         print()
         print('Settings:')
